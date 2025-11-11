@@ -6,5 +6,6 @@ export interface User {
   gmail: string;
   password: string;
   birthday: Date;
+  role: 'user' | 'admin'; 
   eventos?: (string | Evento)[];
 }

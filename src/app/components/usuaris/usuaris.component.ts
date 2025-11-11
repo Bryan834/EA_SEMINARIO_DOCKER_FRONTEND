@@ -15,7 +15,7 @@ import { DynamicTableComponent, TableColumn } from '../table/table.component';
   templateUrl: './usuaris.component.html',
   styleUrls: ['./usuaris.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule, TruncatePipe, MaskEmailPipe, DynamicTableComponent]
+  imports: [CommonModule, FormsModule, MaskEmailPipe, DynamicTableComponent]
 })
 export class UsuarisComponent implements OnInit {
   usuarios: User[] = [];
@@ -28,6 +28,7 @@ export class UsuarisComponent implements OnInit {
     { key: 'gmail', label: 'Email', sortable: true },
     { key: 'birthday', label: 'Cumpleaños', sortable: true, type: 'date' },
     { key: 'eventCount', label: 'Nº Eventos', sortable: true },
+    {key: 'role', label: 'Rol', sortable: true },
     { key: 'actions', label: 'Acciones', type: 'actions' }
   ];
 
@@ -36,6 +37,7 @@ export class UsuarisComponent implements OnInit {
     gmail: '',
     password: '',
     birthday: new Date(),
+    role: 'user',
     eventos: []
   };
 
@@ -175,6 +177,7 @@ export class UsuarisComponent implements OnInit {
       gmail: this.nuevoUsuario.gmail,
       password: this.nuevoUsuario.password,
       birthday: birthdayDate,
+      role: 'user',
       eventos: this.nuevoUsuario.eventos ?? []
     };
 
@@ -232,14 +235,15 @@ export class UsuarisComponent implements OnInit {
     }
     const idx = this.pendingDeleteIndex;
     const usuarioAEliminar = this.usuarios[idx];
-
-    if (!usuarioAEliminar._id) {
-      alert('El usuario no se puede eliminar porque no está registrado en la base de datos.');
+  
+    if (!usuarioAEliminar.username) {
+      alert('El usuario no tiene username válido.');
       this.closeDeleteModal();
       return;
     }
-
-    this.userService.deleteUserById(usuarioAEliminar._id).subscribe(
+  
+    if (usuarioAEliminar._id) {
+      this.userService.deleteUserById(usuarioAEliminar._id).subscribe(
       () => {
         this.usuarios.splice(idx, 1);
         this.desplegado.splice(idx, 1);
@@ -247,12 +251,20 @@ export class UsuarisComponent implements OnInit {
         this.clampPage();
         this.closeDeleteModal();
       },
-      () => {
-        alert('Error al eliminar el usuario. Por favor, inténtalo de nuevo.');
+      (err) => {
+        console.error('Error eliminando usuario:', err);
+        alert(err.error?.message || 'Error al eliminar el usuario.');
         this.closeDeleteModal();
       }
-    );
+      );
+    } else {
+      console.error('Error: usuarioAEliminar._id is undefined.');
+      alert('No se puede eliminar el usuario porque falta su ID.');
+      this.closeDeleteModal();
+    }
+    
   }
+  
 
   cancelarEdicion(userForm: NgForm): void {
     this.indiceEdicion = null;
@@ -267,6 +279,7 @@ export class UsuarisComponent implements OnInit {
       gmail: '',
       password: '',
       birthday: new Date(),
+      role: 'user',
       eventos: []
     };
     this.birthdayStr = this.todayISO();
