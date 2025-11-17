@@ -54,7 +54,7 @@ export class LoginComponent  {
     }
   }
 
-  createAdmin(): void {
+  /*createAdmin(): void {
     this.authService.createAdminUser().subscribe({
       next: (response) => {
         console.log('Admin creado:', response);
@@ -70,7 +70,7 @@ export class LoginComponent  {
         this.errorMessage = 'Error creando usuario admin';
       }
     });
-  }
+  }*/
 
   private markFormGroupTouched(): void {
     Object.keys(this.loginForm.controls).forEach(key => {
